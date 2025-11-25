@@ -1,0 +1,39 @@
+/* Fond de la page */
+body {
+    margin: 0;
+    background-color: #164a0a;
+    display: flex;
+    height: 100vh;
+}
+
+/* Barre d'outils à gauche */
+#toolbar {
+    width: 220px;
+    background: #245c1a;
+    padding: 20px;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+#palette {
+    margin-top: 20px;
+}
+
+.plant-item {
+    background: #2b7020;
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.plant-item img {
+    width: 80px;
+    height: auto;
+}
+
+/* Zone de jeu */
+#game-container {
+    flex: 1;
+    position: relative;
+}

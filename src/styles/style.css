@@ -1,0 +1,56 @@
+
+body {
+    margin: 0;
+    padding: 0;
+
+    background: url("image/ecran_titre.png") no-repeat center center fixed;
+    background-position: center;
+    background-color: rgb(244, 121, 32);
+
+    font-family: Arial, sans-serif;
+
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.title-screen {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.title-screen h1 {
+    color: white;
+    font-size: 3rem;
+    text-shadow: 2px 2px 8px black;
+}
+
+
+.bottom-buttons {
+    width: 100%;
+    padding: 20px;
+
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+
+.play-button {
+    font-size: 1.3rem;
+    padding: 12px 35px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #4caf50;
+    color: white;
+    transition: 0.2s;
+}
+
+.play-button:hover {
+    background: #66cc66;
+    transform: scale(1.05);
+}

@@ -1,0 +1,34 @@
+<!-- levels.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sélection du niveau</title>
+    <link rel="stylesheet" href="style/levels.css">
+</head>
+<body>
+
+<div class="level-container">
+    <h1>Choisis ton niveau</h1>
+
+    <!-- Chaque bouton redirige vers game.html avec un paramètre GET -->
+    <div class="levels">
+        <button onclick="startLevel(1)">Niveau 1</button>
+        <button onclick="startLevel(2)">Niveau 2</button>
+        <button onclick="startLevel(3)">Niveau 3</button>
+    </div>
+</div>
+
+<script>
+    // Fonction appelée lorsqu'on clique sur un niveau
+    function startLevel(level) {
+        // Redirection vers la page du jeu
+        // Le paramètre "level" sera lu dans game.html
+        window.location.href = "game.html?level=" + level;
+    }
+</script>
+
+</body>
+</html>
+
+

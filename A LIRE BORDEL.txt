@@ -1,0 +1,6 @@
+après avoir lancé le .bat
+shift + clic droit pour ouvrir powershell dans le dossier 
+
+PUIS T'ECRIT :
+
+npx serve

@@ -1,0 +1,35 @@
+/* style/levels.css */
+
+/* Fond d'écran (tu mettras ton image plus tard) */
+body {
+    margin: 0;
+    padding: 0;
+    background: url("images/ecran_niveaux.png") no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+/* Conteneur centré */
+.level-container {
+    text-align: center;
+    margin-top: 120px;
+}
+
+/* Titre */
+.level-container h1 {
+    font-size: 48px;
+    margin-bottom: 40px;
+}
+
+/* Zone boutons */
+.levels button {
+    display: block;
+    margin: 20px auto;
+    padding: 15px 40px;
+    font-size: 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
