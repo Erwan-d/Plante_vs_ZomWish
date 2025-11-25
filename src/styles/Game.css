@@ -1,4 +1,4 @@
-/* Fond de la page */
+
 body {
     margin: 0;
     background-color: #164a0a;
@@ -6,7 +6,7 @@ body {
     height: 100vh;
 }
 
-/* Barre d'outils à gauche */
+
 #toolbar {
     width: 220px;
     background: #245c1a;
@@ -32,7 +32,7 @@ body {
     height: auto;
 }
 
-/* Zone de jeu */
+
 #game-container {
     flex: 1;
     position: relative;

@@ -1,28 +1,26 @@
-<!-- game.html -->
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>PVZ - Jeu</title>
 
-    <!-- CSS du jeu -->
+   
     <link rel="stylesheet" href="style/game.css">
 
-    <!-- Vue.js CDN -->
+    <!-- Vue.js  -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <!-- Phaser CDN -->
+    <!-- Phaser  -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
 </head>
 
 <body>
 <div id="app">
 
-    <!-- Barre d’outils pour choisir les plantes -->
+
     <div id="toolbar">
         <h2>Plantes :</h2>
-
-        <!-- Exemple de plantes -->
         <button @click="selectedPlant = 'tournesol'">🌻 Tournesol</button>
         <button @click="selectedPlant = 'pisto-pois'">🌱 Pisto-pois</button>
 
@@ -34,11 +32,11 @@
 
 </div>
 
-<!-- Code du jeu -->
+
 <script src="src/components/game.js"></script>
 
 <script>
-/* --- APP VUE POUR LA BARRE D’OUTILS ET LES PLANTES --- */
+/* --- APP VUE POUR BARRE D’OUTILS ET LES PLANTES --- */
 const app = Vue.createApp({
     data() {
         return {
