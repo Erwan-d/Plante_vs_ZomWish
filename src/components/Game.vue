@@ -1,8 +1,5 @@
 <template>
-  <div id="game-container"
-       @dragover.prevent
-       @drop="onDrop">
-  </div>
+  <div id="game-container"></div>
 </template>
 
 <script>
@@ -11,7 +8,6 @@ import GameScene from "../phaser/GameScene.js";
 
 export default {
   name: "Game",
-
   mounted() {
     this.game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -20,24 +16,6 @@ export default {
       parent: "game-container",
       scene: [GameScene]
     });
-  },
-
-  methods: {
-    onDrop(event) {
-      const plantId = event.dataTransfer.getData("plant");
-
-      if (!plantId) return;
-
-      // Coordinates in Phaser
-      const rect = event.target.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      // Send drop to Phaser Scene
-      window.dispatchEvent(new CustomEvent("plantDropped", {
-        detail: { plantId, x, y }
-      }));
-    }
   }
 };
 </script>
@@ -47,7 +25,12 @@ export default {
   width: 800px;
   height: 600px;
   margin: auto;
-  border: 3px solid red; /* Visible */
+  border: 3px solid red;
 }
 </style>
+
+
+
+
+
 

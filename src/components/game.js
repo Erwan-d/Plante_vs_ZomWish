@@ -1,33 +1,17 @@
-tryPlacePlant(clone, dropZone) {
+// Comme Phaser est global via CDN, pas d'import nécessaire
+// Juste la config et initialise la scène
+import GameScene from "../phaser/GameScene.js";
 
-    for (let r = 0; r < this.rows; r++) {
-        for (let c = 0; c < this.cols; c++) {
-            const cell = this.grid[r][c];
+const config = {
+  type: Phaser.AUTO,
+  width: 600,
+  height: 600,
+  parent: "game-container",
+  backgroundColor: "#000000",
+  scene: [GameScene],  // Assure-toi que GameScene est bien dans le scope global ou ajouté correctement
+};
 
-            if (cell.rect === dropZone) {
+const game = new Phaser.Game(config);
+window.phaserGame = game;
 
-                // Case déjà occupée
-                if (cell.plant) {
-                    clone.x = clone.startX;
-                    clone.y = clone.startY;
-                    return;
-                }
-
-                // On centre
-                clone.x = cell.rect.x;
-                clone.y = cell.rect.y;
-
-                this.input.setDraggable(clone, false);
-                cell.plant = clone;
-
-                // Début production des tournesols
-                if (clone.plantType === "tournesol") {
-                    this.startSunProduction(clone);
-                }
-
-                return;
-            }
-        }
-    }
-}
 
