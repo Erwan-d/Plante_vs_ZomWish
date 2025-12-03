@@ -25,10 +25,14 @@
     <p>Plante sélectionnée : <strong>{{ selectedPlant }}</strong></p>
   </div>
 
-    <!-- PHASER PREND LE RESTE DE L'ÉCRAN -->
-    <div id="game-container">
-        <div id="grid-dropzone"></div>
-    </div>
+<div id="game-container" style="position: relative; height: calc(100vh - 80px); overflow: hidden;">
+  <!-- Canvas Phaser monte ici automatiquement -->
+  <!-- Dropzone qui RECOUVRE TOUT -->
+  <div id="grid-dropzone" 
+       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;">
+  </div>
+</div>
+
 
 </div>
 <script type="module" src="src/components/ui/main-ui.js"></script>

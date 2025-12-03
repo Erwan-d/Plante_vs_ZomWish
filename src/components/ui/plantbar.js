@@ -10,6 +10,7 @@ export default {
           key: "tournesol",
           name: "Tournesol",
           icon: "src/assets/plantes/tournesol/icon.png",
+          sprite: "src/assets/plantes/tournesol/tournesol.png",
           cost: 50,
           classRef: Tournesol  
         },
@@ -17,6 +18,7 @@ export default {
           key: "pistopoix",
           name: "Pisto-pois",
           icon: "src/assets/plantes/pistopoix/icon.png",
+          sprite: "src/assets/plantes/pistopoix/pistopoix.png",
           cost: 100,
           classRef: Pistopoix  
         }

@@ -53,6 +53,7 @@ html, body {
 
 .plant-card {
   background: #2f6b1f;
+  user-select: none;  
   padding: 8px;
   border-radius: 8px;
   cursor: grab;
