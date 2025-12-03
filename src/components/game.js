@@ -3,15 +3,17 @@
 import GameScene from "../phaser/GameScene.js";
 
 const config = {
-  type: Phaser.AUTO,
-  width: 600,
-  height: 600,
-  parent: "game-container",
-  backgroundColor: "#000000",
-  scene: [GameScene],  // Assure-toi que GameScene est bien dans le scope global ou ajouté correctement
+    type: Phaser.AUTO,
+    parent: "game-container",
+
+    scale: {
+        mode: Phaser.Scale.RESIZE,      // <-- s'adapte à toute la zone dispo
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+
+    backgroundColor: "#000000",
+    scene: [GameScene],
 };
 
-const game = new Phaser.Game(config);
-window.phaserGame = game;
-
+new Phaser.Game(config);
 

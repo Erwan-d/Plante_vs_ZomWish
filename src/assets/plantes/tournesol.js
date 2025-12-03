@@ -1,11 +1,12 @@
 export default {
+  key : "tournesol",
   name: "Tournesol",
   cost: 50,
   hp: 300,
   type: "support",
-  spriteIdle: "sprites/tournesol_idle.gif",       // Animation d'attente
-  spriteAction: "sprites/tournesol_produce.gif",  // Animation production soleil
-  produceInterval: 5000,                  // 5 sec
+  icon: "tournesol/icon.png",
+  spriteIdle: "tournesol/tournesol.png",       // Animation d'attente
+  produceInterval: 2000,                  
 
   /**
    * Appelé à la pose sur la grille.

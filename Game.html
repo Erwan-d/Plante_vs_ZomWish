@@ -1,57 +1,45 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>PVZ - Jeu</title>
 
-   
-    <link rel="stylesheet" href="styles/Game.css">
+    <link rel="stylesheet" href="src/styles/Game.css">
 
-    <!-- Vue.js  -->
+    <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <!-- Phaser  -->
+    <!-- Phaser -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
 </head>
 
 <body>
+
 <div id="app">
 
+<div id="app">
+  <!-- BARRE EN HAUT -->
+  <div id="toolbar">
+    <h2>Plantes :</h2>
+    <plant-bar></plant-bar>
+    <p>Plante sélectionnée : <strong>{{ selectedPlant }}</strong></p>
+  </div>
 
-    <div id="toolbar">
-        <h2>Plantes :</h2>
-        <button @click="selectedPlant = 'tournesol'">🌻 Tournesol</button>
-        <button @click="selectedPlant = 'pisto-pois'">🌱 Pisto-pois</button>
-
-        <p>Plante sélectionnée : <strong>{{ selectedPlant }}</strong></p>
+    <!-- PHASER PREND LE RESTE DE L'ÉCRAN -->
+    <div id="game-container">
+        <div id="grid-dropzone"></div>
     </div>
 
-    <!-- Canvas Phaser -->
-    <div id="game-container"></div>
-
 </div>
-
-
+<script type="module" src="src/components/ui/main-ui.js"></script>
 <script type="module" src="src/components/game.js"></script>
 
-
 <script>
-/* --- APP VUE POUR BARRE D’OUTILS ET LES PLANTES --- */
-const app = Vue.createApp({
+Vue.createApp({
     data() {
-        return {
-            selectedPlant: null
-        };
-    },
-    mounted() {
-        // Lecture du niveau passé depuis levels.html
-        const params = new URLSearchParams(window.location.search);
-        const level = params.get("level") || 1;
-        console.log("Niveau choisi :", level);
+        return { selectedPlant: null };
     }
-});
-app.mount("#app");
+}).mount("#app");
 </script>
 
 </body>

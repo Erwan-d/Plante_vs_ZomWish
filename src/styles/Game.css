@@ -1,39 +1,85 @@
-
-body {
+/* Empêche tout scroll */
+html, body {
     margin: 0;
-    background-color: #164a0a;
-    display: flex;
-    height: 100vh;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: url(image/background.png);
 }
 
+/* Conteneur global vertical */
+#app {
+    display: flex;
+    flex-direction: column; /* <- barre en haut */
+    height: 100vh;
+    width: 100vw;
+}
 
+/* --- BARRE DES PLANTES EN HAUT --- */
 #toolbar {
-    width: 220px;
     background: #245c1a;
-    padding: 20px;
+    padding: 15px;
     color: white;
     font-family: Arial, sans-serif;
+    flex: 0 0 auto; /* hauteur automatique */
 }
 
-#palette {
-    margin-top: 20px;
-}
-
-.plant-item {
+#toolbar button {
     background: #2b7020;
-    padding: 10px;
-    margin-bottom: 15px;
-    text-align: center;
-    border-radius: 10px;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-right: 10px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-.plant-item img {
-    width: 80px;
-    height: auto;
+#toolbar button:hover {
+    background: #3c8a2b;
 }
 
-
+/* --- ZONE DU JEU PHASER --- */
 #game-container {
-    flex: 1;
+    flex: 1 1 auto;   /* prend tout l'espace restant */
+    overflow: hidden; /* aucun scroll */
+    background: url(image/background.png);
     position: relative;
+}
+.plant-bar {
+  display: flex;           /* ← ÇA ! aligne horizontalement */
+  gap: 8px;               /* espace entre cartes */
+  flex-wrap: wrap;         /* passe à la ligne si pas assez de place */
+}
+
+.plant-card {
+  background: #2f6b1f;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: grab;
+  width: 80px;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.plant-card:hover {
+  border-color: #fff;
+  transform: scale(1.05);
+}
+
+.plant-card img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.name {
+  font-size: 12px;
+  margin: 4px 0;
+}
+
+.cost {
+  font-size: 11px;
+  color: #ffd700;
+  font-weight: bold;
 }

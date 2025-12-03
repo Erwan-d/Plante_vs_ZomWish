@@ -1,14 +1,17 @@
 export default class ZombieWaveManager {
-  /**
-   * @param {Phaser.Scene} scene - La scène Phaser
-   * @param {Array<Object>} waves - Liste des vagues, chaque vague = { count, types, interval }
-   */
   constructor(scene, waves) {
     this.scene = scene;
     this.waves = waves;
     this.currentWaveIndex = 0;
     this.spawned = 0;
     this.waveInProgress = false;
+    this.currentOnScreen = 0; // Compteur zombies vivants
+    this.MAX_ON_SCREEN = 8;   // Limite fixée
+  }
+
+  // Appelle ceci dans GameScene.removeZombie() pour décrémenter
+  onZombieRemoved() {
+    this.currentOnScreen = Math.max(0, this.currentOnScreen - 1);
   }
 
   startWaves() {
@@ -17,7 +20,7 @@ export default class ZombieWaveManager {
   }
 
   launchWave() {
-    if (this.currentWaveIndex >= this.waves.length) return; // Fin du jeu ou boucle
+    if (this.currentWaveIndex >= this.waves.length) return;
 
     const wave = this.waves[this.currentWaveIndex];
     this.spawned = 0;
@@ -30,22 +33,25 @@ export default class ZombieWaveManager {
       callbackScope: this
     });
 
-    this.spawnZombie(wave); // Spawn 1er zombie directement
+    this.spawnZombie(wave);
 
-    // Optionnel : déclencher next wave après x secondes ou all zombies morts
     setTimeout(() => {
       this.currentWaveIndex++;
       this.launchWave();
-    }, wave.interval * wave.count + 2000); // Buffer avant vague suivante
+    }, wave.interval * wave.count + 2000);
   }
 
   spawnZombie(wave) {
-    // Tirage d'un type de zombie aléatoire dans wave.types
-    const zombieType = wave.types[
-      Math.floor(Math.random() * wave.types.length)
-    ];
-    // Appel de la méthode de spawn (à coder dans ta scène)
+    // Empêche le spawn si 8 sont déjà présents
+    if (this.currentOnScreen >= this.MAX_ON_SCREEN) return;
+    if (this.spawned >= wave.count) return;
+
+    const zombieType =
+      wave.types[Math.floor(Math.random() * wave.types.length)];
+
     this.scene.spawnZombie(zombieType);
     this.spawned++;
+    this.currentOnScreen++;
   }
 }
+

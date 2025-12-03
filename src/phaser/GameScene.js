@@ -4,90 +4,130 @@ import { ZOMBIES } from "../assets/zombies/index.js";
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super("GameScene");
+
     this.rows = 5;
-    this.cols = 5;
+
+    this.visibleCols = 5;   // colonnes jouables visibles
+    this.extraCols = 2;     // colonnes de marge pour le spawn
+    this.cols = this.visibleCols + this.extraCols;
+
     this.cellSize = 120;
     this.grid = [];
     this.zombieGroup = null;
+
+    // facteur d'étirement horizontal ( > 1 = plus large )
+    this.stretchFactor = 1.0;
   }
 
-preload() {
-  this.load.image("gridBg", "src/styles/image/gridBg.png");
+  preload() {
+    this.load.image("gridBg", "src/styles/image/gridBg.png");
 
-  ZOMBIES.forEach(zombie => {
-    this.load.image(zombie.key, "src/assets/zombies/sprites/" + zombie.sprite);
-  });
-}
-
-create() {
-  console.log("create called");
-
-  const gSize = this.cellSize * this.cols;
-  const startX = (this.game.config.width - gSize) / 2;
-  const startY = (this.game.config.height - gSize) / 2;
-
-  this.cameras.main.setBackgroundColor(0x222222);
-
-
-  const bg = this.add.image(startX + gSize / 2, startY + gSize / 2, "gridBg");
-  bg.setDisplaySize(gSize, gSize);
-  bg.setDepth(-1);                  
-
-  // Draw grid lines
-  this.gridGraphics = this.add.graphics();
-  this.gridGraphics.lineStyle(2, 0xffffff, 1);
-
-  // Frame
-  this.gridGraphics.strokeRect(startX, startY, gSize, gSize);
-
-  // Vertical lines
-  for (let i = 1; i < this.cols; i++) {
-    this.gridGraphics.moveTo(startX + i * this.cellSize, startY);
-    this.gridGraphics.lineTo(startX + i * this.cellSize, startY + gSize);
+    ZOMBIES.forEach(zombie => {
+      this.load.image(zombie.key, "src/assets/zombies/sprites/" + zombie.sprite);
+    });
+    this.load.image("bg","src/styles/image/bg.png")
   }
 
-  // Horizontal lines
-  for (let j = 1; j < this.rows; j++) {
-    this.gridGraphics.moveTo(startX, startY + j * this.cellSize);
-    this.gridGraphics.lineTo(startX + gSize, startY + j * this.cellSize);
-  }
+ create() {
+    console.log("GameScene - create()");
 
-  this.gridGraphics.strokePath();
+    const width  = this.scale.gameSize.width;
+    const height = this.scale.gameSize.height;
+    this.cellSize = height / this.rows;
 
-  // Logical grid init
-  for (let r = 0; r < this.rows; r++) {
-    this.grid[r] = [];
-    for (let c = 0; c < this.cols; c++) {
-      this.grid[r][c] = null;
+    const visibleSize   = this.visibleCols * this.cellSize;
+    const stretchedSize = visibleSize * this.stretchFactor;
+
+    const startX = (width - stretchedSize) / 2;
+    const startY = 0;
+    const background = this.add.image(0, 0, "bg")
+        .setOrigin(0, 0)
+        .setDepth(-999);
+
+
+    background.setDisplaySize(width, height);
+
+    const bg = this.add.image(
+      startX + stretchedSize / 2,
+      startY + (this.rows * this.cellSize) / 2,
+      "gridBg"
+    );
+    bg.setDisplaySize(stretchedSize, this.rows * this.cellSize);
+    bg.setDepth(-10);
+
+    this.gridGraphics = this.add.graphics();
+    this.gridGraphics.lineStyle(2, 0xffffff, 1);
+
+   
+    this.gridGraphics.strokeRect(
+        startX,
+        startY,
+        stretchedSize,
+        this.rows * this.cellSize
+    );
+
+    
+    for (let i = 1; i < this.visibleCols; i++) {
+        const x = startX + (i * stretchedSize) / this.visibleCols;
+        this.gridGraphics.moveTo(x, startY);
+        this.gridGraphics.lineTo(x, startY + this.rows * this.cellSize);
     }
-  }
 
-  this.zombieGroup = this.add.group();
+  
+    for (let j = 1; j < this.rows; j++) {
+        const y = startY + j * this.cellSize;
+        this.gridGraphics.moveTo(startX, y);
+        this.gridGraphics.lineTo(startX + stretchedSize, y);
+    }
 
-  window.addEventListener("place-unit", e => {
-    this.placeUnit(e.detail.row, e.detail.col, e.detail.type);
-  });
-  window.phaserPlaceUnit = (row, col, type) => this.placeUnit(row, col, type);
+    this.gridGraphics.strokePath();
 
-  const waves = [
-    { count: 5, types: ZOMBIES.map(z => z.key), interval: 1500 },
-    { count: 8, types: ZOMBIES.map(z => z.key), interval: 1200 },
-    { count: 10, types: ZOMBIES.map(z => z.key), interval: 1000 }
-  ];
 
-  this.zombieWaveManager = new ZombieWaveManager(this, waves);
-  this.zombieWaveManager.startWaves();
+    for (let r = 0; r < this.rows; r++) {
+        this.grid[r] = [];
+        for (let c = 0; c < this.cols; c++) {
+            this.grid[r][c] = null;
+        }
+    }
+
+
+
+    this.zombieGroup = this.add.group();
+    window.addEventListener("place-unit", e => {
+        this.placeUnit(e.detail.row, e.detail.col, e.detail.type);
+    });
+
+    window.phaserPlaceUnit = (row, col, type) =>
+        this.placeUnit(row, col, type);
+
+    const waves = [
+      { count: 5, types: ZOMBIES.map(z => z.key), interval: 1500 },
+      { count: 8, types: ZOMBIES.map(z => z.key), interval: 1200 },
+      { count: 10, types: ZOMBIES.map(z => z.key), interval: 1000 }
+    ];
+
+    this.zombieWaveManager = new ZombieWaveManager(this, waves);
+    this.zombieWaveManager.startWaves();
+     window.phaserPlaceUnit = (row, col, type) => this.placeUnit(row, col, type);
 }
 
 
   placeUnit(row, col, type) {
+    if (col >= this.visibleCols) return;
     if (this.grid[row][col]) return;
 
-    const gSize = this.cellSize * this.cols;
-    const startX = (this.game.config.width - gSize) / 2;
-    const startY = (this.game.config.height - gSize) / 2;
+    const width  = this.scale.gameSize.width;
+    const height = this.scale.gameSize.height;
+    this.cellSize = height / this.rows;
 
-    const x = startX + col * this.cellSize + this.cellSize / 2;
+    const visibleSize   = this.visibleCols * this.cellSize;
+    const stretchedSize = visibleSize * this.stretchFactor;
+    const startX = (width - stretchedSize) / 2;
+    const startY = 0;
+
+    const cellWidth = stretchedSize / this.visibleCols;
+
+    const x = startX + col * cellWidth + cellWidth / 2;
     const y = startY + row * this.cellSize + this.cellSize / 2;
 
     const unit = this.add.image(x, y, type).setScale(0.8);
@@ -99,13 +139,22 @@ create() {
     if (!zombie) return;
 
     const row = Phaser.Math.Between(0, this.rows - 1);
-    const gSize = this.cellSize * this.cols;
-    const startX = (this.game.config.width - gSize) / 2;
 
-    const x = startX + gSize + 40;
-    const y = (row * this.cellSize) + this.cellSize / 2;
+    const width  = this.scale.gameSize.width;
+    const height = this.scale.gameSize.height;
+    this.cellSize = height / this.rows;
 
-    const sprite = this.add.image(x, y, zombie.key).setScale(0.8);
+    const visibleSize   = this.visibleCols * this.cellSize;
+    const stretchedSize = visibleSize * this.stretchFactor;
+    const startX = (width - stretchedSize) / 2;
+
+    const cellWidth = stretchedSize / this.visibleCols;
+
+    // spawn après les colonnes visibles + colonnes de marge
+    const spawnX = startX + (this.visibleCols + this.extraCols) * cellWidth;
+    const y = row * this.cellSize + this.cellSize / 2;
+
+    const sprite = this.add.image(spawnX, y, zombie.key).setScale(0.8);
     sprite.hp = zombie.hp;
     sprite.speed = zombie.speed;
 
@@ -121,6 +170,7 @@ create() {
     if (!zombieSprite) return;
     zombieSprite.destroy();
     this.zombieGroup.remove(zombieSprite);
+    this.zombieWaveManager.onZombieRemoved?.();
   }
 
   update() {
@@ -130,3 +180,4 @@ create() {
     });
   }
 }
+
