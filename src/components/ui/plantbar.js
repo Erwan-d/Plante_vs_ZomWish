@@ -19,6 +19,7 @@ export default {
           name: "Pisto-pois",
           icon: "src/assets/plantes/pistopoix/icon.png",
           sprite: "src/assets/plantes/pistopoix/pistopoix.png",
+          projectile: "pistopoix/poix.png",
           cost: 100,
           classRef: Pistopoix  
         }

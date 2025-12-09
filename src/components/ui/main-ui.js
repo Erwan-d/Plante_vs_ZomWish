@@ -12,68 +12,71 @@ const app = createApp({
 
 const vm = app.mount("#app");
 
-// ← ATTENDRE QUE LE DOM SOIT PRÊT
-document.addEventListener('DOMContentLoaded', () => {
-  console.log("DOM prêt, config drop...");
-  
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM prêt, configuration du drag & drop...");
+
   const dropzone = document.getElementById("grid-dropzone");
   if (!dropzone) {
-    console.error("❌ #grid-dropzone NON TROUVÉ");
+    console.error("#grid-dropzone NON TROUVÉ !");
     return;
   }
-  
-  console.log("✅ Dropzone trouvée:", dropzone);
 
-  // ← FIX 1: Empêcher tout pointer-events sur les enfants
+  console.log("Dropzone trouvée:", dropzone);
+
   dropzone.style.pointerEvents = "auto";
-  dropzone.style.background = "rgba(255,0,0,0.1)"; // ← DEBUG VISUEL (enlève après)
 
-  // ← FIX 2: Events avec VERROUILLAGE complet
+// event drag&drop
   dropzone.addEventListener("dragover", e => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "copy";
-    console.log("🔄 dragover !");
-  }, false);
+  });
 
   dropzone.addEventListener("dragenter", e => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("➡️ dragenter !");
-  }, false);
+  });
 
-  dropzone.addEventListener("dragleave", e => {
-    console.log("⬅️ dragleave");
-  }, false);
+  dropzone.addEventListener("dragleave", e => {});
 
   dropzone.addEventListener("drop", e => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("💥 DROP !");
+    console.log("DROP détecté !");
 
     const plantKey = e.dataTransfer.getData("plantKey");
-    console.log("🌱 plantKey:", plantKey);
+    console.log("Plante:", plantKey);
 
-    if (!plantKey || !window.phaserPlaceUnit) {
-      console.error("❌ plantKey ou Phaser manquant");
+    if (!plantKey) {
+      console.error(" plantKey manquant");
       return;
     }
 
-    const rect = dropzone.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    console.log("📍 x:", x, "y:", y, "w:", rect.width, "h:", rect.height);
-
-    const rows = 5, cols = 5;
-    const row = Math.floor(y / (rect.height / rows));
-    const col = Math.floor(x / (rect.width / cols));
-
-    console.log("🎯 row:", row, "col:", col);
-
-    if (row >= 0 && row < rows && col >= 0 && col < cols) {
-      window.phaserPlaceUnit(row, col, plantKey);
+    if (!window.phaserScene || !window.phaserScene.convertPointerToGrid) {
+      console.error(" Phaser pas encore prêt");
+      return;
     }
-  }, false);
 
-  console.log("✅ Dropzone configurée");
+    // === coordonnées drag&drop
+    const rect = dropzone.getBoundingClientRect();
+    const x = e.clientX - rect.left; 
+    const y = e.clientY - rect.top;
+
+    console.log(" Drop coord:", x, y);
+
+    // place sur la grille
+    const cell = window.phaserScene.convertPointerToGrid(x, y);
+
+    if (!cell) {
+      console.warn(" Drop en dehors de la grille Phaser");
+      return;
+    }
+
+    console.log("Case détectée:", cell.row, cell.col);
+
+    // ===  place sur la cases correspondantes
+    window.phaserPlaceUnit(cell.row, cell.col, plantKey);
+  });
+
+  console.log(" Drag & Drop réussi");
 });

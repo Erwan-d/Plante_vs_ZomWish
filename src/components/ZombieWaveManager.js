@@ -5,11 +5,11 @@ export default class ZombieWaveManager {
     this.currentWaveIndex = 0;
     this.spawned = 0;
     this.waveInProgress = false;
-    this.currentOnScreen = 0; // Compteur zombies vivants
-    this.MAX_ON_SCREEN = 8;   // Limite fixée
+    this.currentOnScreen = 0; 
+    this.MAX_ON_SCREEN = 8;   
   }
 
-  // Appelle ceci dans GameScene.removeZombie() pour décrémenter
+  
   onZombieRemoved() {
     this.currentOnScreen = Math.max(0, this.currentOnScreen - 1);
   }
@@ -42,7 +42,7 @@ export default class ZombieWaveManager {
   }
 
   spawnZombie(wave) {
-    // Empêche le spawn si 8 sont déjà présents
+    // Empêche le spawn si 8 zombie sur l'écran
     if (this.currentOnScreen >= this.MAX_ON_SCREEN) return;
     if (this.spawned >= wave.count) return;
 

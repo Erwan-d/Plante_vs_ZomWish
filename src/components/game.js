@@ -1,5 +1,4 @@
-// Comme Phaser est global via CDN, pas d'import nécessaire
-// Juste la config et initialise la scène
+
 import GameScene from "../phaser/GameScene.js";
 
 const config = {
@@ -7,7 +6,7 @@ const config = {
     parent: "game-container",
 
     scale: {
-        mode: Phaser.Scale.RESIZE,      // <-- s'adapte à toute la zone dispo
+        mode: Phaser.Scale.RESIZE,      
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
 
