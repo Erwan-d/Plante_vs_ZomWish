@@ -1,58 +1,70 @@
 import ZombieWaveManager from "../components/ZombieWaveManager.js";
+import ProjectilesManager from "../components/ProjectilesManager.js";
 import { ZOMBIES } from "../assets/zombies/index.js";
 import { Pistopoix, Tournesol } from "../assets/plantes/index.js";
-const PLANTS = [Pistopoix, Tournesol];
 
+const PLANTS = [Pistopoix, Tournesol];
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super("GameScene");
 
     this.rows = 5;
-
-    this.visibleCols = 5;   
-    this.extraCols = 2;     
+    this.visibleCols = 5;
+    this.extraCols = 2;
     this.cols = this.visibleCols + this.extraCols;
 
     this.cellSize = 120;
     this.grid = [];
     this.zombieGroup = null;
+    this.projectilesManager = null;
 
     this.stretchFactor = 1.4;
   }
 
-preload() {
-  this.load.image("gridBg", "src/styles/image/gridBg.png");
+  preload() {
+    // fond de grille
+    this.load.image("gridBg", "src/styles/image/gridBg.png");
 
-
-  ZOMBIES.forEach(zombie => {
-    this.load.image(zombie.key, "src/assets/zombies/sprites/" + zombie.sprite);
-  });
-  PLANTS.forEach(plant => {
-    this.load.image(
-      plant.key,
-      "src/assets/plantes/" + plant.spriteIdle
-    );
-    this.load.image(
-      plant.key + "_icon",
-      "src/assets/plantes/" + plant.icon
-    );
-    if (plant.projectile) {
+    // zombies
+    ZOMBIES.forEach(zombie => {
       this.load.image(
-        plant.key + "_projectile",
-        "src/assets/plantes/" + plant.projectile
+        zombie.key,
+        "src/assets/zombies/sprites/" + zombie.sprite
       );
-    }
-  });
+    });
 
-  this.load.image("bg", "src/styles/image/bg.png");
-}
+    // plantes + icônes + projectiles
+    PLANTS.forEach(plant => {
+      // sprite de la plante sur la grille
+      this.load.image(
+        plant.key,
+        "src/assets/plantes/" + plant.spriteIdle
+      );
 
+      // icône pour la barre de plantes
+      this.load.image(
+        plant.key + "_icon",
+        "src/assets/plantes/" + plant.icon
+      );
+
+      // projectile (ex: "pistopoix/poix.png")
+      if (plant.projectile) {
+        this.load.image(
+          plant.key + "_projectile",                    // ex: "pistopoix_projectile"
+          "src/assets/plantes/" + plant.projectile      // ex: "src/assets/plantes/pistopoix/poix.png"
+        );
+      }
+    });
+
+    // fond global
+    this.load.image("bg", "src/styles/image/bg.png");
+  }
 
   create() {
     console.log("🎮 GameScene - create() START");
 
-    //  scène pour drag&drop
+    // scène pour drag&drop
     window.phaserScene = this;
 
     const width  = this.scale.width;
@@ -61,8 +73,8 @@ preload() {
 
     const visibleSize   = this.visibleCols * this.cellSize;
     const stretchedSize = visibleSize * this.stretchFactor;
-    const startX = (width - stretchedSize) / 2;
-    const startY = 0;
+    const startX        = (width - stretchedSize) / 2;
+    const startY        = 0;
 
     // Background
     const background = this.add.image(0, 0, "bg")
@@ -79,7 +91,7 @@ preload() {
     bg.setDisplaySize(stretchedSize, this.rows * this.cellSize);
     bg.setDepth(-10);
 
-    // visuelle grille
+    // Grille visuelle
     this.gridGraphics = this.add.graphics({ x: 0, y: 0 });
     this.gridGraphics.lineStyle(2, 0xffffff, 0.8);
 
@@ -98,7 +110,7 @@ preload() {
     }
     this.gridGraphics.strokePath();
 
-    // Grille
+    // Grille logique
     this.grid = [];
     for (let r = 0; r < this.rows; r++) {
       this.grid[r] = [];
@@ -107,20 +119,22 @@ preload() {
       }
     }
 
-    this.zombieGroup = this.add.group();
+    // Groupes
+    this.zombieGroup        = this.add.group();
+    this.projectilesManager = new ProjectilesManager(this);
 
-    // Placement 
+    // Placement via fonction globale (main-ui peut l'appeler)
     window.phaserPlaceUnit = (row, col, type) => {
-      if (this.placeUnit(row, col, type)) {
-        console.log("Plante placée :", type, "en", row, col);
-      }
+      this.placeUnit(row, col, type);
     };
 
+    // Placement via CustomEvent
     window.addEventListener("place-unit", e => {
-      this.placeUnit(e.detail.row, e.detail.col, e.detail.type);
+      const { row, col, type } = e.detail;
+      this.placeUnit(row, col, type);
     });
 
-    // Vagues 
+    // Vagues de zombies
     const waves = [
       { count: 5, types: ZOMBIES.map(z => z.key), interval: 1500 },
       { count: 8, types: ZOMBIES.map(z => z.key), interval: 1200 },
@@ -129,18 +143,20 @@ preload() {
 
     this.zombieWaveManager = new ZombieWaveManager(this, waves);
     this.zombieWaveManager.startWaves();
+
+    console.log("✅ GameScene prête");
   }
 
-  // drag&drop logique 
+  // drag&drop logique
   convertPointerToGrid(x, y) {
     const width  = this.scale.gameSize.width;
     const height = this.scale.gameSize.height;
 
-    const cellSize = height / this.rows;
+    const cellSize      = height / this.rows;
     const visibleSize   = this.visibleCols * cellSize;
     const stretchedSize = visibleSize * this.stretchFactor;
-    const startX = (width - stretchedSize) / 2;
-    const startY = 0;
+    const startX        = (width - stretchedSize) / 2;
+    const startY        = 0;
 
     if (x < startX || x > startX + stretchedSize) return null;
     if (y < startY || y > startY + this.rows * cellSize) return null;
@@ -156,42 +172,45 @@ preload() {
     return { row, col };
   }
 
-placeUnit(row, col, type) {
-  if (col >= this.visibleCols) return;
-  if (this.grid[row][col]) return;
+  placeUnit(row, col, type) {
+    if (col >= this.visibleCols) return false;
+    if (this.grid[row][col]) return false;
 
-  if (!this.textures.exists(type)) {
-    console.error(` Sprite manquant pour la plante : "${type}"`);
-    return;
+    if (!this.textures.exists(type)) {
+      console.error(`Sprite manquant pour la plante : "${type}"`);
+      return false;
+    }
+
+    const width  = this.scale.gameSize.width;
+    const height = this.scale.gameSize.height;
+    this.cellSize = height / this.rows;
+
+    const visibleSize   = this.visibleCols * this.cellSize;
+    const stretchedSize = visibleSize * this.stretchFactor;
+    const startX        = (width - stretchedSize) / 2;
+
+    const cellWidth = stretchedSize / this.visibleCols;
+
+    const x = startX + col * cellWidth + cellWidth / 2;
+    const y = row * this.cellSize + this.cellSize / 2;
+
+    const plantSprite = this.add.image(x, y, type)
+      .setOrigin(0.5)
+      .setScale(0.85);
+
+    this.grid[row][col] = plantSprite;
+
+    // déclenche la logique spécifique à la plante (tirs, etc.)
+    if (type === "pistopoix" && typeof Pistopoix.onPlaced === "function") {
+      Pistopoix.onPlaced(this, row, col);
+    } else if (type === "tournesol" && typeof Tournesol.onPlaced === "function") {
+      Tournesol.onPlaced(this, row, col);
+    }
+
+    console.log(`Plante "${type}" placée en (${row}, ${col})`);
+    return true;
   }
 
-
-  const width  = this.scale.gameSize.width;
-  const height = this.scale.gameSize.height;
-  this.cellSize = height / this.rows;
-
-  const visibleSize   = this.visibleCols * this.cellSize;
-  const stretchedSize = visibleSize * this.stretchFactor;
-  const startX = (width - stretchedSize) / 2;
-
-  const cellWidth = stretchedSize / this.visibleCols;
-
-
-  const x = startX + col * cellWidth + cellWidth / 2;
-  const y = row * this.cellSize + this.cellSize / 2;
-
-
-  const plantSprite = this.add.image(x, y, type)
-    .setOrigin(0.5)
-    .setScale(0.85);
-
-  
-  this.grid[row][col] = plantSprite;
-
-  console.log(` Plante "${type}" placée en (${row}, ${col})`);
-}
-
- // spawn zombie
   spawnZombie(typeKey) {
     const zombie = ZOMBIES.find(z => z.key === typeKey);
     if (!zombie) return;
@@ -204,15 +223,15 @@ placeUnit(row, col, type) {
 
     const visibleSize   = this.visibleCols * this.cellSize;
     const stretchedSize = visibleSize * this.stretchFactor;
-    const startX = (width - stretchedSize) / 2;
+    const startX        = (width - stretchedSize) / 2;
 
     const cellWidth = stretchedSize / this.visibleCols;
 
     const spawnX = startX + (this.visibleCols + this.extraCols) * cellWidth;
-    const y = row * this.cellSize + this.cellSize / 2;
+    const y      = row * this.cellSize + this.cellSize / 2;
 
     const sprite = this.add.image(spawnX, y, zombie.key).setScale(0.8);
-    sprite.hp = zombie.hp;
+    sprite.hp    = zombie.hp;
     sprite.speed = zombie.speed;
 
     this.zombieGroup.add(sprite);
@@ -235,7 +254,9 @@ placeUnit(row, col, type) {
       zombie.x -= zombie.speed;
       if (zombie.x < -50) this.removeZombie(zombie);
     });
+
+    if (this.projectilesManager) {
+      this.projectilesManager.update();
+    }
   }
 }
-
-
