@@ -2,7 +2,7 @@ export default {
   key : "tournesol",
   name: "Tournesol",
   cost: 50,
-  hp: 300,
+  hp: 250,
   type: "support",
   icon: "tournesol/icon.png",
   spriteIdle: "tournesol/tournesol.png",       // Animation d'attente

@@ -6,6 +6,7 @@ export default {
   type: "enemy",
   sprite: "zombiebase.png",
   death: "dead.png",
+  damage: 50,
   onSpawn(game, x, y) {
   }
 };

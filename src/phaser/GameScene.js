@@ -23,6 +23,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("zombie_death", "src/assets/zombies/sprites/dead.png");
+
     // fond de grille
     this.load.image("gridBg", "src/styles/image/gridBg.png");
 
@@ -172,91 +174,157 @@ export default class GameScene extends Phaser.Scene {
     return { row, col };
   }
 
-  placeUnit(row, col, type) {
-    if (col >= this.visibleCols) return false;
-    if (this.grid[row][col]) return false;
+placeUnit(row, col, type) {
+  if (col >= this.visibleCols) return false;
+  if (this.grid[row][col]) return false;
 
-    if (!this.textures.exists(type)) {
-      console.error(`Sprite manquant pour la plante : "${type}"`);
-      return false;
+  if (!this.textures.exists(type)) {
+    console.error(`Sprite manquant pour la plante : "${type}"`);
+    return false;
+  }
+
+  const width  = this.scale.gameSize.width;
+  const height = this.scale.gameSize.height;
+  this.cellSize = height / this.rows;
+
+  const visibleSize   = this.visibleCols * this.cellSize;
+  const stretchedSize = visibleSize * this.stretchFactor;
+  const startX        = (width - stretchedSize) / 2;
+
+  const cellWidth = stretchedSize / this.visibleCols;
+
+  const x = startX + col * cellWidth + cellWidth / 2;
+  const y = row * this.cellSize + this.cellSize / 2;
+
+  const sprite = this.add.image(x, y, type)
+    .setOrigin(0.5)
+    .setScale(0.85);
+
+  // PV de base selon le type de plante (à ajuster)
+  let hp = 100;
+  if (type === "pistopoix") hp = 120;
+  if (type === "tournesol") hp = 80;
+
+  this.grid[row][col] = { sprite, type, hp, row, col };
+
+  // tirs des plantes
+  if (type === "pistopoix" && typeof Pistopoix.onPlaced === "function") {
+    Pistopoix.onPlaced(this, row, col);
+  } else if (type === "tournesol" && typeof Tournesol.onPlaced === "function") {
+    Tournesol.onPlaced(this, row, col);
+  }
+
+  console.log(`Plante "${type}" placée en (${row}, ${col}) avec ${hp} HP`);
+  return true;
+}
+
+
+spawnZombie(typeKey) {
+  const zombie = ZOMBIES.find(z => z.key === typeKey);
+  if (!zombie) return;
+
+  const row = Phaser.Math.Between(0, this.rows - 1);
+
+  const width  = this.scale.gameSize.width;
+  const height = this.scale.gameSize.height;
+  this.cellSize = height / this.rows;
+
+  const visibleSize   = this.visibleCols * this.cellSize;
+  const stretchedSize = visibleSize * this.stretchFactor;
+  const startX        = (width - stretchedSize) / 2;
+
+  const cellWidth = stretchedSize / this.visibleCols;
+
+  const spawnX = startX + (this.visibleCols + this.extraCols) * cellWidth;
+  const y      = row * this.cellSize + this.cellSize / 2;
+
+  const sprite = this.add.image(spawnX, y, zombie.key).setScale(0.8);
+  sprite.hp     = zombie.hp;
+  sprite.speed  = zombie.speed;
+  sprite.row    = row;
+  sprite.attack = zombie.attack || 10; // dégâts de base à définir dans ZOMBIES
+
+  this.zombieGroup.add(sprite);
+
+  sprite.takeDamage = dmg => {
+    sprite.hp -= dmg;
+    if (sprite.hp <= 0) this.removeZombie(sprite);
+  };
+}
+
+
+ removeZombie(zombieSprite) {
+  if (!zombieSprite) return;
+
+
+  const deathX = zombieSprite.x;
+  const deathY = zombieSprite.y;
+
+
+  const deathSprite = this.add.image(deathX, deathY, "zombie_death")
+    .setScale(0.8); 
+
+
+  this.time.delayedCall(2000, () => {
+    if (deathSprite && deathSprite.destroy) {
+      deathSprite.destroy();
     }
+  });
 
+  zombieSprite.destroy();
+  this.zombieGroup.remove(zombieSprite);
+  this.zombieWaveManager.onZombieRemoved?.();
+}
+
+
+update(time, delta) {
+  this.zombieGroup.getChildren().forEach(zombie => {
+    const row = zombie.row ?? 0;
     const width  = this.scale.gameSize.width;
     const height = this.scale.gameSize.height;
-    this.cellSize = height / this.rows;
+    const cellSize = height / this.rows;
 
-    const visibleSize   = this.visibleCols * this.cellSize;
+    const visibleSize   = this.visibleCols * cellSize;
     const stretchedSize = visibleSize * this.stretchFactor;
     const startX        = (width - stretchedSize) / 2;
+    const cellWidth     = stretchedSize / this.visibleCols;
 
-    const cellWidth = stretchedSize / this.visibleCols;
+    const col = Math.floor((zombie.x - startX) / cellWidth);
 
-    const x = startX + col * cellWidth + cellWidth / 2;
-    const y = row * this.cellSize + this.cellSize / 2;
+    const plantCell =
+      row >= 0 && row < this.rows && col >= 0 && col < this.visibleCols
+        ? this.grid[row][col]
+        : null;
 
-    const plantSprite = this.add.image(x, y, type)
-      .setOrigin(0.5)
-      .setScale(0.85);
+    if (plantCell && plantCell.sprite && plantCell.hp > 0) {
+      // zombie attaque la plante
+      if (!zombie.nextAttackTime || time >= zombie.nextAttackTime) {
+        zombie.nextAttackTime = time + 1000; // 1 attaque / seconde
 
-    this.grid[row][col] = plantSprite;
+        plantCell.hp -= zombie.attack;
 
-    // déclenche la logique spécifique à la plante (tirs, etc.)
-    if (type === "pistopoix" && typeof Pistopoix.onPlaced === "function") {
-      Pistopoix.onPlaced(this, row, col);
-    } else if (type === "tournesol" && typeof Tournesol.onPlaced === "function") {
-      Tournesol.onPlaced(this, row, col);
-    }
+        if (plantCell.hp <= 0) {
+          // ⚠️ ARRÊTER LES TIRS DE LA PLANTE ICI
+          if (plantCell.type === "pistopoix" && typeof Pistopoix.onRemove === "function") {
+            Pistopoix.onRemove();
+          } else if (plantCell.type === "tournesol" && typeof Tournesol.onRemove === "function") {
+            Tournesol.onRemove();
+          }
 
-    console.log(`Plante "${type}" placée en (${row}, ${col})`);
-    return true;
-  }
-
-  spawnZombie(typeKey) {
-    const zombie = ZOMBIES.find(z => z.key === typeKey);
-    if (!zombie) return;
-
-    const row = Phaser.Math.Between(0, this.rows - 1);
-
-    const width  = this.scale.gameSize.width;
-    const height = this.scale.gameSize.height;
-    this.cellSize = height / this.rows;
-
-    const visibleSize   = this.visibleCols * this.cellSize;
-    const stretchedSize = visibleSize * this.stretchFactor;
-    const startX        = (width - stretchedSize) / 2;
-
-    const cellWidth = stretchedSize / this.visibleCols;
-
-    const spawnX = startX + (this.visibleCols + this.extraCols) * cellWidth;
-    const y      = row * this.cellSize + this.cellSize / 2;
-
-    const sprite = this.add.image(spawnX, y, zombie.key).setScale(0.8);
-    sprite.hp    = zombie.hp;
-    sprite.speed = zombie.speed;
-
-    this.zombieGroup.add(sprite);
-
-    sprite.takeDamage = dmg => {
-      sprite.hp -= dmg;
-      if (sprite.hp <= 0) this.removeZombie(sprite);
-    };
-  }
-
-  removeZombie(zombieSprite) {
-    if (!zombieSprite) return;
-    zombieSprite.destroy();
-    this.zombieGroup.remove(zombieSprite);
-    this.zombieWaveManager.onZombieRemoved?.();
-  }
-
-  update() {
-    this.zombieGroup.getChildren().forEach(zombie => {
+          plantCell.sprite.destroy();
+          this.grid[row][col] = null;
+        }
+      }
+      // zombie ne bouge pas pendant qu'il tape
+    } else {
+      // pas de plante devant → avance
       zombie.x -= zombie.speed;
       if (zombie.x < -50) this.removeZombie(zombie);
-    });
-
-    if (this.projectilesManager) {
-      this.projectilesManager.update();
     }
+  });
+
+  if (this.projectilesManager) {
+    this.projectilesManager.update();
   }
+}
 }

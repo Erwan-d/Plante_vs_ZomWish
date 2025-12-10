@@ -6,7 +6,7 @@ export default class ZombieWaveManager {
     this.spawned = 0;
     this.waveInProgress = false;
     this.currentOnScreen = 0; 
-    this.MAX_ON_SCREEN = 8;   
+    this.MAX_ON_SCREEN = 15;   
   }
 
   

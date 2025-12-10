@@ -2,12 +2,12 @@ export default {
   key: "pistopoix",
   name: "Pisto-pois",
   cost: 100,
-  hp: 250,
+  hp: 1,
   icon: "pistopoix/icon.png",
   spriteIdle: "pistopoix/pistopoix.png",
   projectile: "pistopoix/poix.png",
   shootInterval: 1500,
-  damage: 25,
+  damage: 0,
 
 onPlaced(scene, row, col) {
   console.log("🟢 pistopoix.onPlaced appelé", { row, col, sceneHasManager: !!scene.projectilesManager });
